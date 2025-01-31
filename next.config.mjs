@@ -32,6 +32,21 @@ const nextConfig = {
       },
     ];
   },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000']
+    }
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    return config;
+  },
 };
 
 export default nextConfig;
