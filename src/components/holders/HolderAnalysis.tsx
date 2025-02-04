@@ -446,6 +446,64 @@ const MultiSelect = ({
   );
 };
 
+interface HolderAnalysisData {
+  category: string;
+  holders: number;
+  holdersChange: number;
+  supply: number;
+  supplyChange: number;
+  avgBalance: string;
+  avgBalanceChange: number;
+}
+
+const analysisData: HolderAnalysisData[] = [
+  {
+    category: 'Smart Money',
+    holders: 125,
+    holdersChange: 12,
+    supply: 15.2,
+    supplyChange: 2.8,
+    avgBalance: '$52,450',
+    avgBalanceChange: 5.2
+  },
+  {
+    category: 'Long-term Holders',
+    holders: 892,
+    holdersChange: -23,
+    supply: 45.8,
+    supplyChange: -1.2,
+    avgBalance: '$28,750',
+    avgBalanceChange: -2.1
+  },
+  {
+    category: 'Active Traders',
+    holders: 458,
+    holdersChange: 89,
+    supply: 12.5,
+    supplyChange: 8.9,
+    avgBalance: '$15,280',
+    avgBalanceChange: 12.8
+  },
+  {
+    category: 'Whales',
+    holders: 35,
+    holdersChange: 2,
+    supply: 28.9,
+    supplyChange: 1.5,
+    avgBalance: '$458,920',
+    avgBalanceChange: 3.2
+  },
+  {
+    category: 'Fresh Wallets',
+    holders: 1245,
+    holdersChange: 458,
+    supply: 8.2,
+    supplyChange: 15.8,
+    avgBalance: '$3,680',
+    avgBalanceChange: -8.5
+  }
+];
+
 export default function HolderAnalysis() {
   const {
     filters: { timeframe, selectedCategories },
@@ -488,7 +546,7 @@ export default function HolderAnalysis() {
             <div className="group relative">
               <FiInfo className="w-3.5 h-3.5 text-gray-500 cursor-help" />
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900/95 backdrop-blur-sm rounded-lg text-xs text-gray-300 w-64 hidden group-hover:block z-10 shadow-xl border border-gray-800">
-                Visualization of token holder composition over time, showing the distribution among different types of holders.
+                Detailed breakdown of token holders by category, showing distribution and changes over time.
               </div>
             </div>
           </div>
@@ -607,6 +665,71 @@ export default function HolderAnalysis() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="text-xs text-gray-400 border-b border-gray-800/30">
+              <th className="text-left font-medium py-2">Category</th>
+              <th className="text-right font-medium py-2">Holders</th>
+              <th className="text-right font-medium py-2">24h Change</th>
+              <th className="text-right font-medium py-2">Supply %</th>
+              <th className="text-right font-medium py-2">24h Change</th>
+              <th className="text-right font-medium py-2">Avg. Balance</th>
+              <th className="text-right font-medium py-2">24h Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {analysisData.map((row) => (
+              <tr 
+                key={row.category}
+                className="border-b border-gray-800/30 last:border-0 hover:bg-gray-800/20 transition-colors"
+              >
+                <td className="py-3 text-sm text-gray-300">{row.category}</td>
+                <td className="py-3 text-sm text-gray-300 text-right">{row.holders.toLocaleString()}</td>
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {row.holdersChange >= 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={row.holdersChange >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {row.holdersChange >= 0 ? '+' : ''}{row.holdersChange}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 text-sm text-gray-300 text-right">{row.supply.toFixed(1)}%</td>
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {row.supplyChange >= 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={row.supplyChange >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {row.supplyChange >= 0 ? '+' : ''}{row.supplyChange.toFixed(1)}%
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 text-sm text-gray-300 text-right">{row.avgBalance}</td>
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {row.avgBalanceChange >= 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={row.avgBalanceChange >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {row.avgBalanceChange >= 0 ? '+' : ''}{row.avgBalanceChange.toFixed(1)}%
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

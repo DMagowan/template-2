@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FiInfo, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
@@ -17,6 +17,30 @@ interface MetricCardProps {
   sparklineData: SparklineData[];
   subtitle?: string;
   info?: string;
+}
+
+interface TimeFilterProps {
+  selected: string;
+  onChange: (value: string) => void;
+}
+
+interface MetricRowProps {
+  title: string;
+  value: string;
+  change: number;
+  info: string;
+  count?: number;
+}
+
+interface Holder {
+  name: string;
+  ownership: number;
+  balance: string;
+  change24h: number;
+  change7d: number;
+  change30d: number;
+  received: string;
+  sent: string;
 }
 
 const generateSparklineData = (trend: 'up' | 'down' | 'flat' = 'flat'): SparklineData[] => {
@@ -126,40 +150,34 @@ const MetricCard = ({ title, value, change, status, sparklineData, subtitle, inf
   );
 };
 
-const MetricRow = ({ title, value, change, info, count }: { title: string; value: string; change: number; info?: string; count?: number }) => (
-  <div className="flex items-center justify-between py-2.5 border-b border-gray-800/30 last:border-0 hover:bg-gray-800/20 transition-colors duration-150 rounded px-2 -mx-2">
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-gray-300">{title}</span>
-      {info && (
-        <div className="group relative">
-          <FiInfo className="w-3 h-3 text-gray-500/80 cursor-help transition-colors duration-150 group-hover:text-gray-400" />
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800/95 backdrop-blur-sm rounded-lg text-xs text-gray-200 w-48 hidden group-hover:block z-10 shadow-xl border border-gray-700/50 transform opacity-0 group-hover:opacity-100 transition-all duration-200">
+const MetricRow: React.FC<MetricRowProps> = ({ title, value, change, info, count }) => {
+  return (
+    <div className="flex items-center justify-between py-2 group">
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-300">{title}</span>
+        <div className="relative">
+          <FiInfo className="w-3.5 h-3.5 text-gray-500 cursor-help opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900/95 backdrop-blur-sm rounded-lg text-xs text-gray-300 w-64 hidden group-hover:block z-10 shadow-xl border border-gray-800">
             {info}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-gray-800/95 border-r border-b border-gray-700/50 transform rotate-45"></div>
           </div>
         </div>
-      )}
-    </div>
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm font-semibold text-gray-200">{value}</span>
-        {count && (
-          <span className="text-xs text-gray-500">({count})</span>
-        )}
       </div>
-      <div className="flex items-center gap-1 min-w-[60px] justify-end">
-        {change >= 0 ? (
-          <FiTrendingUp className="w-3 h-3 text-green-400/90" />
-        ) : (
-          <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+      <div className="flex items-center gap-3">
+        {count !== undefined && (
+          <span className="text-xs text-gray-400">({count})</span>
         )}
-        <span className={`text-xs font-medium ${change >= 0 ? 'text-green-400/90' : 'text-red-400/90'}`}>
-          {change >= 0 ? '+' : ''}{change}%
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-200">{value}</span>
+          <div className={change >= 0 ? 'text-green-400' : 'text-red-400'}>
+            <span className="text-xs">
+              {change >= 0 ? '+' : ''}{change.toFixed(1)}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SectionHeader = ({ title }: { title: string }) => (
   <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-800/50">
@@ -167,17 +185,16 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-const TimeFilter = ({ selected, onChange }: { selected: string; onChange: (period: string) => void }) => {
-  const periods = ['24H', '7D', '30D', 'ALL'];
+const TimeFilter: React.FC<TimeFilterProps> = ({ selected, onChange }) => {
   return (
-    <div className="flex items-center gap-1 bg-gray-900/50 rounded-lg p-0.5">
-      {periods.map((period) => (
+    <div className="flex items-center gap-1">
+      {['24H', '7D', '30D'].map((period) => (
         <button
           key={period}
           onClick={() => onChange(period)}
-          className={`text-xs px-2 py-1 rounded ${
+          className={`px-2 py-1 text-xs rounded ${
             selected === period
-              ? 'bg-gray-800 text-gray-200'
+              ? 'bg-blue-500/20 text-blue-400'
               : 'text-gray-400 hover:text-gray-300'
           }`}
         >
@@ -209,7 +226,7 @@ const WalletValueFilter = ({ selected, onChange }: { selected: string; onChange:
   );
 };
 
-const HolderGrowthChart = () => {
+const HolderGrowthChart: React.FC = () => {
   const [timeFilter, setTimeFilter] = React.useState('24H');
   const [walletFilter, setWalletFilter] = React.useState('ALL');
   
@@ -321,7 +338,7 @@ const HolderGrowthChart = () => {
   );
 };
 
-const DecentralizationMetrics = () => {
+const DecentralizationMetrics: React.FC = () => {
   const [timeFilter, setTimeFilter] = React.useState('24H');
   const metrics = [
     { title: 'Median Holder', value: '118', change: -58, info: 'Indicates the typical holding duration of token holders. Lower values suggest more active trading.' },
@@ -345,7 +362,7 @@ const DecentralizationMetrics = () => {
   );
 };
 
-const SignificantHolders = () => {
+const SignificantHolders: React.FC = () => {
   const [timeFilter, setTimeFilter] = React.useState('24H');
   const holders = [
     { title: 'Smart Money', value: '12.5%', change: 3.2, count: 28, info: 'Wallets identified as sophisticated investors with consistent profitable trades.' },
@@ -376,9 +393,9 @@ const SignificantHolders = () => {
   );
 };
 
-const TokenHolderList = () => {
-  const [selectedFilters, setSelectedFilters] = React.useState<string[]>([]);
-  const [showFilters, setShowFilters] = React.useState(false);
+const TokenHolderList: React.FC = () => {
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   const filterCategories = [
     {
@@ -411,36 +428,16 @@ const TokenHolderList = () => {
     }
   ];
 
-  const holders = [
+  const holders: Holder[] = [
     {
-      name: 'Raydium: Authority V4',
-      ownership: 3.66,
-      balance: '36,584,404',
-      change24h: 23781286,
-      change7d: 36522886,
-      change30d: 36522886,
-      received: '9,808,698,092',
-      sent: '9,772,175,206'
-    },
-    {
-      name: 'Birget: A77HEtqt',
-      ownership: 1.88,
-      balance: '18,799,282',
-      change24h: 15325080,
-      change7d: 18799282,
-      change30d: 18799282,
-      received: '18,799,282',
-      sent: '0'
-    },
-    {
-      name: 'Meteora: 🦎 JELLYJELLY-SOL Liquidity',
-      ownership: 1.85,
-      balance: '18,528,115',
-      change24h: 6944369,
-      change7d: 18528115,
-      change30d: 18528115,
-      received: '630,093,735',
-      sent: '611,565,620'
+      name: 'Raydium: SOL-JELLYJELLY LP',
+      ownership: 2.15,
+      balance: '21,528,115',
+      change24h: 8944369,
+      change7d: 21528115,
+      change30d: 21528115,
+      received: '730,093,735',
+      sent: '708,565,620'
     },
     {
       name: 'JellyJelly Token Deployer',
@@ -481,86 +478,6 @@ const TokenHolderList = () => {
       change30d: 8268859,
       received: '11,954,141',
       sent: '3,685,282'
-    },
-    {
-      name: 'POW',
-      ownership: 0.79,
-      balance: '7,941,898',
-      change24h: -150000,
-      change7d: 7941898,
-      change30d: 7941898,
-      received: '7,941,898',
-      sent: '0'
-    },
-    {
-      name: 'Wintermute Market Making (test 4)',
-      ownership: 0.78,
-      balance: '7,763,183',
-      change24h: 7763183,
-      change7d: 7763183,
-      change30d: 7763183,
-      received: '221,084,419',
-      sent: '213,321,236'
-    },
-    {
-      name: 'Meteora: 🦎 JELLYJELLY-SOL Liquidity (2)',
-      ownership: 0.76,
-      balance: '7,573,186',
-      change24h: 4403359,
-      change7d: 7573186,
-      change30d: 7573186,
-      received: '239,182,485',
-      sent: '231,609,299'
-    },
-    {
-      name: 'Raydium: SOL-JELLYJELLY',
-      ownership: 0.73,
-      balance: '7,298,384',
-      change24h: 3765947,
-      change7d: 7298384,
-      change30d: 7298384,
-      received: '138,026,113',
-      sent: '130,727,729'
-    },
-    {
-      name: 'Meteora: 🦎 JELLYJELLY-SOL Liquidity (3)',
-      ownership: 0.72,
-      balance: '7,152,823',
-      change24h: 3783849,
-      change7d: 7105506,
-      change30d: 7105506,
-      received: '739,319,484',
-      sent: '732,166,661'
-    },
-    {
-      name: 'New Token Specialist',
-      ownership: 0.71,
-      balance: '7,121,767',
-      change24h: 6819859,
-      change7d: 7121767,
-      change30d: 7121767,
-      received: '9,433,274',
-      sent: '2,311,507'
-    },
-    {
-      name: 'huigen.sol',
-      ownership: 0.71,
-      balance: '7,050,735',
-      change24h: 7050735,
-      change7d: 7050735,
-      change30d: 7050735,
-      received: '13,951,155',
-      sent: '6,900,420'
-    },
-    {
-      name: 'a3a3dao.sol',
-      ownership: 0.69,
-      balance: '6,900,420',
-      change24h: 6900420,
-      change7d: 6900420,
-      change30d: 6900420,
-      received: '6,900,420',
-      sent: '0'
     }
   ];
 
@@ -650,19 +567,19 @@ const TokenHolderList = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="text-left border-b border-gray-800/50">
-              <th className="pb-2 text-xs font-medium text-gray-400">Name</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">% Ownership</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Balance</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Change 24H</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Change 7D</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Change 30D</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Received</th>
-              <th className="pb-2 text-xs font-medium text-gray-400 text-right">Sent</th>
+            <tr className="text-xs text-gray-400 border-b border-gray-800/30">
+              <th className="text-left font-medium py-2">Holder</th>
+              <th className="text-right font-medium py-2">Ownership</th>
+              <th className="text-right font-medium py-2">Balance</th>
+              <th className="text-right font-medium py-2">24h Change</th>
+              <th className="text-right font-medium py-2">7d Change</th>
+              <th className="text-right font-medium py-2">30d Change</th>
+              <th className="text-right font-medium py-2">Total Received</th>
+              <th className="text-right font-medium py-2">Total Sent</th>
             </tr>
           </thead>
           <tbody>
-            {holders.map((holder, index) => (
+            {holders.map((holder) => (
               <tr 
                 key={holder.name}
                 className="border-b border-gray-800/30 last:border-0 hover:bg-gray-800/20 transition-colors"
@@ -692,24 +609,11 @@ const TokenHolderList = () => {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center gap-1">
-          <button className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors">
-            Previous
-          </button>
-          <button className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors">
-            Next
-          </button>
-        </div>
-        <span className="text-xs text-gray-400">
-          Showing 1-15 of 100 holders
-        </span>
-      </div>
     </div>
   );
 };
 
-export default function HolderSummaryGrid() {
+const HolderSummaryGrid: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
@@ -720,4 +624,6 @@ export default function HolderSummaryGrid() {
       <TokenHolderList />
     </div>
   );
-} 
+};
+
+export default HolderSummaryGrid; 
