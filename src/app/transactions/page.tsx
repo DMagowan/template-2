@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import BuySellVolume from '@/components/transactions/BuySellVolume';
 import DCABuySellPressure from '@/components/transactions/DCABuySellPressure';
 import TopTransactions from '@/components/transactions/TopTransactions';
-import LiveDexTrades from '@/components/transactions/LiveDexTrades';
-import DCAOrders from '@/components/transactions/DCAOrders';
+import CombinedTradesWidget from '@/components/transactions/CombinedTradesWidget';
 
 // Trader categories for filtering
 const TRADER_CATEGORIES = [
@@ -134,25 +133,19 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Live DEX Trades Table */}
+      {/* Combined Trades Widget */}
       <div className="bg-[#1B2838] rounded-lg p-4 border border-gray-800/50 mb-4">
-        <LiveDexTrades 
+        <CombinedTradesWidget 
           timeframe={selectedTimeframe}
           categories={selectedCategories}
         />
       </div>
 
-      {/* Combined DCA Widget */}
+      {/* DCA Buy/Sell Pressure */}
       <div className="bg-[#1B2838] rounded-lg p-4 border border-gray-800/50">
-        <div className="mb-6">
-          <DCABuySellPressure 
-            timeframe={selectedTimeframe} 
-            categories={selectedCategories} 
-          />
-        </div>
-        <DCAOrders 
-          timeframe={selectedTimeframe}
-          categories={selectedCategories}
+        <DCABuySellPressure 
+          timeframe={selectedTimeframe} 
+          categories={selectedCategories} 
         />
       </div>
     </div>

@@ -39,6 +39,16 @@ export default function Navigation() {
                 Holders
               </Link>
               <Link
+                href="/supply"
+                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                  isActive('/supply')
+                    ? 'bg-[#2D4263] text-blue-400'
+                    : 'text-gray-300 hover:bg-[#2D4263] hover:text-gray-100'
+                }`}
+              >
+                Supply
+              </Link>
+              <Link
                 href="/transactions"
                 className={`px-3 py-2 text-sm font-medium rounded-md ${
                   isActive('/transactions')

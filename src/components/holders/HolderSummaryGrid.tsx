@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { FiInfo, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
-import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, ComposedChart, Line, Tooltip } from 'recharts';
+import HolderAnalysisComponent from './HolderAnalysis';
 
 interface SparklineData {
   value: number;
@@ -393,237 +394,125 @@ const SignificantHolders: React.FC = () => {
   );
 };
 
-const TokenHolderList: React.FC = () => {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+const HolderAnalysis: React.FC = () => {
+  return (
+    <div className="bg-[#0B1221] rounded-lg border border-gray-800/50">
+      <HolderAnalysisComponent />
+    </div>
+  );
+};
 
-  const filterCategories = [
-    {
-      title: 'Smart Segment',
-      options: [
-        { label: 'Smart Traders', count: 4 },
-        { label: 'Chain Specialist', count: 11 },
-        { label: 'Sector Expert', count: 5 },
-        { label: 'Other', count: 2 },
-        { label: 'Funds', count: 1 }
-      ]
-    },
-    {
-      title: 'Label',
-      options: [
-        { label: 'Exchange', count: 3 },
-        { label: 'DEX', count: 5 },
-        { label: 'Protocol', count: 8 },
-        { label: 'Whale', count: 12 }
-      ]
-    },
-    {
-      title: 'Balance',
-      options: [
-        { label: '> $100k', count: 15 },
-        { label: '$10k - $100k', count: 45 },
-        { label: '$1k - $10k', count: 120 },
-        { label: '< $1k', count: 450 }
-      ]
-    }
-  ];
+export default function HolderSummaryGrid() {
+  const [timeframe, setTimeframe] = useState('24H');
+  const [error, setError] = useState<Error | null>(null);
 
-  const holders: Holder[] = [
-    {
-      name: 'Raydium: SOL-JELLYJELLY LP',
-      ownership: 2.15,
-      balance: '21,528,115',
-      change24h: 8944369,
-      change7d: 21528115,
-      change30d: 21528115,
-      received: '730,093,735',
-      sent: '708,565,620'
-    },
-    {
-      name: 'JellyJelly Token Deployer',
-      ownership: 1.80,
-      balance: '18,037,076',
-      change24h: 22189,
-      change7d: 18037076,
-      change30d: 18037076,
-      received: '18,037,076',
-      sent: '0'
-    },
-    {
-      name: 'VINE Whale',
-      ownership: 1.15,
-      balance: '11,031,518',
-      change24h: 8322924,
-      change7d: 11031518,
-      change30d: 11031518,
-      received: '11,033,000',
-      sent: '1,482'
-    },
-    {
-      name: 'MEXC: Wallet',
-      ownership: 0.92,
-      balance: '9,195,050',
-      change24h: 4808687,
-      change7d: 9195050,
-      change30d: 9195050,
-      received: '10,589,068',
-      sent: '1,394,018'
-    },
-    {
-      name: 'Wintermute Market Making',
-      ownership: 0.83,
-      balance: '8,268,859',
-      change24h: 8268859,
-      change7d: 8268859,
-      change30d: 8268859,
-      received: '11,954,141',
-      sent: '3,685,282'
-    }
-  ];
-
-  const toggleFilter = (filter: string) => {
-    setSelectedFilters(prev => 
-      prev.includes(filter) 
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
+  if (error) {
+    return (
+      <div className="p-4 bg-[#0B1221] rounded-lg">
+        <h3 className="text-red-500">Error loading holder summary</h3>
+        <p className="text-gray-400">{error.message}</p>
+      </div>
     );
-  };
+  }
 
   return (
-    <div className="bg-[#0B1221] rounded-lg p-4 border border-gray-800/50">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <h3 className="text-sm font-semibold text-gray-200 tracking-wide">Token Holders</h3>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors flex items-center gap-2"
-          >
-            <span>Filter</span>
-            {selectedFilters.length > 0 && (
-              <span className="bg-blue-500/20 text-blue-400 px-1.5 rounded-full">
-                {selectedFilters.length}
-              </span>
-            )}
-          </button>
+    <div className="space-y-6">
+      {/* Holder Growth Section */}
+      <div className="bg-[#0B1221] rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-300">Holder Growth</h3>
+          <div className="flex items-center gap-2">
+            {/* Timeframe Filter */}
+            <div className="flex bg-[#1B2838] rounded-lg p-0.5">
+              {['24H', '7D', '30D'].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setTimeframe(period)}
+                  className={timeframe === period
+                    ? 'px-3 py-1 text-xs rounded-md bg-blue-500/20 text-blue-400'
+                    : 'px-3 py-1 text-xs rounded-md text-gray-400 hover:text-gray-300'
+                  }
+                >
+                  {period}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors">
-            Export CSV
-          </button>
-        </div>
-      </div>
 
-      {showFilters && (
-        <div className="mb-4 p-4 bg-gray-900/50 rounded-lg border border-gray-800/50">
-          <div className="grid grid-cols-3 gap-8">
-            {filterCategories.map((category) => (
-              <div key={category.title}>
-                <h4 className="text-xs font-medium text-gray-400 mb-2">{category.title}</h4>
-                <div className="space-y-1">
-                  {category.options.map((option) => (
-                    <label 
-                      key={option.label} 
-                      className="flex items-center justify-between group cursor-pointer py-1 px-2 rounded hover:bg-gray-800/50"
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedFilters.includes(option.label)}
-                          onChange={() => toggleFilter(option.label)}
-                          className="form-checkbox h-3 w-3 rounded border-gray-600 bg-gray-800 text-blue-500 focus:ring-0 focus:ring-offset-0"
-                        />
-                        <span className="text-sm text-gray-300">{option.label}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">({option.count})</span>
-                    </label>
-                  ))}
-                </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">24H</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-200">+168 holders</span>
+              <div className="text-green-400">
+                <span className="text-xs">+2.8%</span>
               </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800/50">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400">
-                {selectedFilters.length} filters selected
-              </span>
             </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">7D</span>
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setSelectedFilters([])}
-                className="text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
-              >
-                Clear All
-              </button>
-              <button 
-                className="text-xs px-3 py-1.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-              >
-                Apply Filters
-              </button>
+              <span className="text-sm text-gray-200">+892 holders</span>
+              <div className="text-green-400">
+                <span className="text-xs">+12.4%</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">30D</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-200">+3,847 holders</span>
+              <div className="text-green-400">
+                <span className="text-xs">+45.2%</span>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-xs text-gray-400 border-b border-gray-800/30">
-              <th className="text-left font-medium py-2">Holder</th>
-              <th className="text-right font-medium py-2">Ownership</th>
-              <th className="text-right font-medium py-2">Balance</th>
-              <th className="text-right font-medium py-2">24h Change</th>
-              <th className="text-right font-medium py-2">7d Change</th>
-              <th className="text-right font-medium py-2">30d Change</th>
-              <th className="text-right font-medium py-2">Total Received</th>
-              <th className="text-right font-medium py-2">Total Sent</th>
-            </tr>
-          </thead>
-          <tbody>
-            {holders.map((holder) => (
-              <tr 
-                key={holder.name}
-                className="border-b border-gray-800/30 last:border-0 hover:bg-gray-800/20 transition-colors"
-              >
-                <td className="py-3 text-sm text-gray-300">{holder.name}</td>
-                <td className="py-3 text-sm text-gray-300 text-right">{holder.ownership.toFixed(2)}%</td>
-                <td className="py-3 text-sm text-gray-300 text-right">{holder.balance}</td>
-                <td className="py-3 text-sm text-right">
-                  <span className={holder.change24h >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
-                    {holder.change24h >= 0 ? '+' : ''}{holder.change24h.toLocaleString()}
-                  </span>
-                </td>
-                <td className="py-3 text-sm text-right">
-                  <span className={holder.change7d >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
-                    {holder.change7d >= 0 ? '+' : ''}{holder.change7d.toLocaleString()}
-                  </span>
-                </td>
-                <td className="py-3 text-sm text-right">
-                  <span className={holder.change30d >= 0 ? 'text-green-400/90' : 'text-red-400/90'}>
-                    {holder.change30d >= 0 ? '+' : ''}{holder.change30d.toLocaleString()}
-                  </span>
-                </td>
-                <td className="py-3 text-sm text-gray-300 text-right">{holder.received}</td>
-                <td className="py-3 text-sm text-gray-300 text-right">{holder.sent}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Decentralization Metrics */}
+      <div className="bg-[#0B1221] rounded-lg p-4">
+        <h3 className="text-sm font-medium text-gray-300 mb-4">Decentralization Metrics</h3>
+        <div className="space-y-4">
+          <div className="group">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Median Holder</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-200">118</span>
+                <span className="text-red-400">-58%</span>
+              </div>
+            </div>
+          </div>
+          <div className="group">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">HHI</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-200">43</span>
+                <span className="text-green-400">+20%</span>
+              </div>
+            </div>
+          </div>
+          <div className="group">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Top 100 Holders</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-200">8.0%</span>
+                <span className="text-green-400">+3.0%</span>
+              </div>
+            </div>
+          </div>
+          <div className="group">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">Fresh Wallets</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-200">68%</span>
+                <span className="text-red-400">-2%</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-const HolderSummaryGrid: React.FC = () => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
-        <HolderGrowthChart />
-        <DecentralizationMetrics />
-        <SignificantHolders />
-      </div>
-      <TokenHolderList />
-    </div>
-  );
-};
-
-export default HolderSummaryGrid; 
+} 

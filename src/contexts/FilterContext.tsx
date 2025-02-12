@@ -28,31 +28,31 @@ const defaultFilters: FilterState = {
   walletSizeFilter: 'ALL',
   searchQuery: '',
   page: 1,
-  itemsPerPage: 15
+  itemsPerPage: 10
 };
 
-const FilterContext = createContext<FilterContextType | undefined>(undefined);
+const FilterContext = createContext<FilterContextType | null>(null);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [isLoading, setIsLoading] = useState(false);
 
   const setTimeframe = useCallback((timeframe: string) => {
-    setIsLoading(true);
     setFilters(prev => ({ ...prev, timeframe }));
-    // Simulate API call delay
+    setIsLoading(true);
+    // Simulate loading
     setTimeout(() => setIsLoading(false), 500);
   }, []);
 
   const setSelectedCategories = useCallback((categories: string[]) => {
-    setIsLoading(true);
     setFilters(prev => ({ ...prev, selectedCategories: categories }));
+    setIsLoading(true);
     setTimeout(() => setIsLoading(false), 500);
   }, []);
 
   const setWalletSizeFilter = useCallback((size: string) => {
-    setIsLoading(true);
     setFilters(prev => ({ ...prev, walletSizeFilter: size }));
+    setIsLoading(true);
     setTimeout(() => setIsLoading(false), 500);
   }, []);
 
@@ -61,30 +61,26 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setPage = useCallback((page: number) => {
-    setIsLoading(true);
     setFilters(prev => ({ ...prev, page }));
-    setTimeout(() => setIsLoading(false), 500);
   }, []);
 
   const setItemsPerPage = useCallback((items: number) => {
-    setIsLoading(true);
     setFilters(prev => ({ ...prev, itemsPerPage: items }));
-    setTimeout(() => setIsLoading(false), 500);
   }, []);
 
+  const value = {
+    filters,
+    setTimeframe,
+    setSelectedCategories,
+    setWalletSizeFilter,
+    setSearchQuery,
+    setPage,
+    setItemsPerPage,
+    isLoading
+  };
+
   return (
-    <FilterContext.Provider
-      value={{
-        filters,
-        setTimeframe,
-        setSelectedCategories,
-        setWalletSizeFilter,
-        setSearchQuery,
-        setPage,
-        setItemsPerPage,
-        isLoading
-      }}
-    >
+    <FilterContext.Provider value={value}>
       {children}
     </FilterContext.Provider>
   );
@@ -92,7 +88,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
 export function useFilters() {
   const context = useContext(FilterContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useFilters must be used within a FilterProvider');
   }
   return context;

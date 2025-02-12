@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FiSearch, FiFilter, FiX, FiLoader } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiX, FiLoader, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import { useFilters } from '@/contexts/FilterContext';
 
 interface TokenHolder {
@@ -58,9 +58,9 @@ export default function TokenHolderList() {
   const totalPages = Math.ceil(filteredHolders.length / itemsPerPage);
 
   return (
-    <div className="bg-[#0B1221] rounded-lg border border-gray-800/50">
-      <div className="p-4 border-b border-gray-800/50">
-        <div className="flex items-center justify-between gap-4">
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -73,19 +73,23 @@ export default function TokenHolderList() {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-900/50 text-gray-300 hover:bg-gray-800/50"
+            className="text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors flex items-center gap-2"
           >
-            <FiFilter className="w-4 h-4" />
-            <span className="text-sm">Filters</span>
+            <span>Filter</span>
             {selectedCategories.length > 0 && (
-              <span className="bg-blue-500/20 text-blue-400 px-1.5 rounded-full text-xs">
+              <span className="bg-blue-500/20 text-blue-400 px-1.5 rounded-full">
                 {selectedCategories.length}
               </span>
             )}
           </button>
         </div>
+        <button className="text-xs px-3 py-1.5 rounded bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors">
+          Export CSV
+        </button>
+      </div>
 
-        {showFilters && (
+      {showFilters && (
+        <div className="mb-4">
           <div className="mt-4 space-y-4">
             <div>
               <h4 className="text-sm font-medium text-gray-300 mb-2">Wallet Size</h4>
@@ -106,10 +110,10 @@ export default function TokenHolderList() {
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="relative">
+      <div className="relative overflow-x-auto">
         {isLoading && (
           <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-10">
             <FiLoader className="w-8 h-8 text-blue-500 animate-spin" />
@@ -118,52 +122,72 @@ export default function TokenHolderList() {
         
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-800/50">
-              <th className="text-left p-4 text-xs font-medium text-gray-400">Address</th>
-              <th className="text-right p-4 text-xs font-medium text-gray-400">Balance</th>
-              <th className="text-right p-4 text-xs font-medium text-gray-400">Value</th>
-              <th className="text-right p-4 text-xs font-medium text-gray-400">% Owned</th>
-              <th className="text-right p-4 text-xs font-medium text-gray-400">Last Activity</th>
-              <th className="text-left p-4 text-xs font-medium text-gray-400">Labels</th>
+            <tr className="text-xs text-gray-400 border-b border-gray-800/30">
+              <th className="text-left font-medium py-2">Holder</th>
+              <th className="text-right font-medium py-2">Ownership</th>
+              <th className="text-right font-medium py-2">Balance</th>
+              <th className="text-right font-medium py-2">24h Change</th>
+              <th className="text-right font-medium py-2">7d Change</th>
+              <th className="text-right font-medium py-2">30d Change</th>
+              <th className="text-right font-medium py-2">Total Received</th>
+              <th className="text-right font-medium py-2">Total Sent</th>
             </tr>
           </thead>
           <tbody className={`transition-opacity duration-200 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
             {paginatedHolders.map((holder, index) => (
-              <tr key={holder.address} className="border-b border-gray-800/50 last:border-0">
-                <td className="p-4">
+              <tr key={holder.address} className="border-b border-gray-800/30 last:border-0 hover:bg-gray-800/20 transition-colors">
+                <td className="py-3">
                   <span className="text-sm text-gray-300 font-mono">
                     {holder.address.slice(0, 6)}...{holder.address.slice(-4)}
                   </span>
                 </td>
-                <td className="p-4 text-right">
-                  <span className="text-sm text-gray-300">
-                    {holder.balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                  </span>
+                <td className="py-3 text-sm text-gray-300 text-right">
+                  {holder.percentageOwned.toFixed(2)}%
                 </td>
-                <td className="p-4 text-right">
-                  <span className="text-sm text-gray-300">
-                    ${holder.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                  </span>
+                <td className="py-3 text-sm text-gray-300 text-right">
+                  {holder.balance.toLocaleString()}
                 </td>
-                <td className="p-4 text-right">
-                  <span className="text-sm text-gray-300">
-                    {holder.percentageOwned.toFixed(2)}%
-                  </span>
-                </td>
-                <td className="p-4 text-right">
-                  <span className="text-sm text-gray-300">{holder.lastActivity}</span>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    {holder.labels.map((label) => (
-                      <span
-                        key={label}
-                        className="px-2 py-1 rounded-lg text-xs bg-gray-800/50 text-gray-300"
-                      >
-                        {label}
-                      </span>
-                    ))}
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {holder.balance > 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={holder.balance > 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {holder.balance > 0 ? '+' : ''}{(holder.balance * 0.1).toLocaleString()}
+                    </span>
                   </div>
+                </td>
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {holder.balance > 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={holder.balance > 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {holder.balance > 0 ? '+' : ''}{(holder.balance * 0.3).toLocaleString()}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 text-sm text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {holder.balance > 0 ? (
+                      <FiTrendingUp className="w-3 h-3 text-green-400/90" />
+                    ) : (
+                      <FiTrendingDown className="w-3 h-3 text-red-400/90" />
+                    )}
+                    <span className={holder.balance > 0 ? 'text-green-400/90' : 'text-red-400/90'}>
+                      {holder.balance > 0 ? '+' : ''}{(holder.balance * 0.5).toLocaleString()}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 text-sm text-gray-300 text-right">
+                  {(holder.balance * 1.2).toLocaleString()}
+                </td>
+                <td className="py-3 text-sm text-gray-300 text-right">
+                  {(holder.balance * 0.2).toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -171,7 +195,7 @@ export default function TokenHolderList() {
         </table>
       </div>
 
-      <div className="p-4 border-t border-gray-800/50 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <select
             value={itemsPerPage}
